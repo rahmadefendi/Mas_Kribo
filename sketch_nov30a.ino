@@ -80,20 +80,7 @@ void loop() {
     lcd.print("Terdeteksi");
     analogWrite(pwm1, 0);
     analogWrite(pwm2, 0);
-  }
-
-
-  else if (L == 0) {
-    lastMillis1 = millis();
- }
-  if (millis() - lastMillis1 <= 900) {
-    (redColor > greenColor && redColor > blueColor) {
-      Serial.println(" - RED detected!");
-      digitalWrite(relay1, relayON);
-      delay(10000);
-      digitalWrite(relay1, relayOFF);
-      delay(2000);
-     }  else {
+  }      else {
     Serial.println("  Tidak terdeteksi");
     lcd.clear();
     lcd.setCursor(0, 0);
@@ -102,8 +89,18 @@ void loop() {
     analogWrite(pwm2, 40);
       delay(1000);
   }
+
+  while (redColor > greenColor && redColor > blueColor) {
+      Serial.println(" - RED detected!");
+      digitalWrite(relay1, relayON);
+      delay(1000);
+      digitalWrite(relay1, relayOFF);
+      delay(1000);
+     }  
+
     
 }
+
 
 
 void warna() {
