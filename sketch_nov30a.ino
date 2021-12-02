@@ -24,13 +24,13 @@ int redColor = 0;
 int greenColor = 0;
 int blueColor = 0;
 
-bool motorstate = false;
-
 unsigned long interval = 2000; // the time we need to wait
 unsigned long previousMillis = 0; // millis() returns an unsigned long.
 
 int relayON = LOW; //relay nyala
 int relayOFF = HIGH; //relay mati
+
+unsigned long lastMillis1;
 
 void setup() {
 
@@ -40,6 +40,9 @@ void setup() {
 
   pinMode(relay1, OUTPUT);
   pinMode(relay2, OUTPUT);
+
+  digitalWrite(relay1, relayOFF);
+  digitalWrite(relay2, relayOFF);
 
   pinMode(SENSOR, INPUT_PULLUP);
   Serial.println(" Deteksi Sensor IR " );
@@ -57,61 +60,49 @@ void setup() {
   // Setting the sensorOut as an input
   pinMode(sensorOut, INPUT);
 
-  digitalWrite(relay1, relayOFF);
-  digitalWrite(relay2, relayOFF);
-
   // Setting frequency scaling to 20%
   digitalWrite(S0, HIGH);
   digitalWrite(S1, LOW);
 
+   lastMillis1 = millis();
 }
 
 void loop() {
 
   warna();
 
-  if (redColor > greenColor && redColor > blueColor) {
-    Serial.println(" - RED detected!");
-    digitalWrite(relay1, relayON);
-    delay(1000);
-    digitalWrite(relay1, relayOFF);
-    delay(1000);
-  }
-  if (greenColor > redColor && greenColor > blueColor) {
-    Serial.println(" - GREEN detected!");
-  }
-  if (blueColor > redColor && blueColor > greenColor) {
-    Serial.println(" - BLUE detected!");
-  }
-
   int L = digitalRead(SENSOR);
 
-  unsigned long currentMillis = millis();
-
-  if ((unsigned long)(currentMillis - previousMillis) >= interval) {
-
-    motorstate = !motorstate; // "toggles" the state
-    if (L == 0) {
-      Serial.println("  Tedeteksi");
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("Terdeteksi");
-      analogWrite(pwm1, 0);
-      analogWrite(pwm2, 0);
-
-    }
-    else {
-      Serial.println("  Tidak terdeteksi");
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("Tidak Terdeteksi");
-      analogWrite(pwm1, 0);
-      analogWrite(pwm2, 40);
-
-    }
-    previousMillis = millis();
-
+  if (L == 0) {
+    Serial.println("  Tedeteksi");
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Terdeteksi");
+    analogWrite(pwm1, 0);
+    analogWrite(pwm2, 0);
   }
+
+
+  else if (L == 0) {
+    lastMillis1 = millis();
+ }
+  if (millis() - lastMillis1 <= 900) {
+    (redColor > greenColor && redColor > blueColor) {
+      Serial.println(" - RED detected!");
+      digitalWrite(relay1, relayON);
+      delay(10000);
+      digitalWrite(relay1, relayOFF);
+      delay(2000);
+     }  else {
+    Serial.println("  Tidak terdeteksi");
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Tidak Terdeteksi");
+    analogWrite(pwm1, 0);
+    analogWrite(pwm2, 40);
+      delay(1000);
+  }
+    
 }
 
 
@@ -125,10 +116,10 @@ void warna() {
   // Remaping the value of the RED (R) frequency from 0 to 255
   // You must replace with your own values. Here's an example:
   // redColor = map(redFrequency, 70, 120, 255,0);
-  redColor = map(redFrequency, 36, 104, 255, 0);
+  redColor = map(redFrequency, 39, 103, 255, 0);
 
   // Printing the RED (R) value
-  Serial.print("R = ");
+  Serial.print("R= ");
   Serial.print(redColor);
   delay(100);
 
@@ -144,7 +135,7 @@ void warna() {
   greenColor = map(greenFrequency, 38, 101, 255, 0);
 
   // Printing the GREEN (G) value
-  Serial.print(" G = ");
+  Serial.print(" G= ");
   Serial.print(greenColor);
   delay(100);
 
@@ -157,10 +148,10 @@ void warna() {
   // Remaping the value of the BLUE (B) frequency from 0 to 255
   // You must replace with your own values. Here's an example:
   // blueColor = map(blueFrequency, 38, 84, 255, 0);
-  blueColor = map(blueFrequency, 80, 159, 255, 0);
+  blueColor = map(blueFrequency, 38, 125, 255, 0);
 
   // Printing the BLUE (B) value
-  Serial.print(" B = ");
+  Serial.print(" B= ");
   Serial.print(blueColor);
   delay(100);
 }
