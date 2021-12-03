@@ -64,7 +64,7 @@ void setup() {
   digitalWrite(S0, HIGH);
   digitalWrite(S1, LOW);
 
-   lastMillis1 = millis();
+  lastMillis1 = millis();
 }
 
 void loop() {
@@ -80,27 +80,32 @@ void loop() {
     lcd.print("Terdeteksi");
     analogWrite(pwm1, 0);
     analogWrite(pwm2, 0);
-  }      else {
+
+    if (redColor > greenColor && redColor > blueColor) {
+      Serial.println(" - RED detected!");
+      digitalWrite(relay1, relayON);
+    }
+
+    else if (blueColor > redColor && blueColor > greenColor) {
+      Serial.println(" - BLUE detected!");
+      digitalWrite(relay1, relayOFF);
+      delay(3000);
+      analogWrite(pwm1, 0);
+      analogWrite(pwm2, 30);
+    }
+  }
+
+  else  {
     Serial.println("  Tidak terdeteksi");
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Tidak Terdeteksi");
     analogWrite(pwm1, 0);
-    analogWrite(pwm2, 40);
-      delay(1000);
+    analogWrite(pwm2, 30);
+    delay(1000);
   }
 
-  while (redColor > greenColor && redColor > blueColor) {
-      Serial.println(" - RED detected!");
-      digitalWrite(relay1, relayON);
-      delay(1000);
-      digitalWrite(relay1, relayOFF);
-      delay(1000);
-     }  
-
-    
 }
-
 
 
 void warna() {
@@ -116,23 +121,23 @@ void warna() {
   redColor = map(redFrequency, 39, 103, 255, 0);
 
   // Printing the RED (R) value
-  Serial.print("R= ");
+  Serial.println("R= ");
   Serial.print(redColor);
   delay(100);
 
   // Setting GREEN (G) filtered photodiodes to be read
   digitalWrite(S2, HIGH);
-  digitalWrite(S3, LOW);
+  digitalWrite(S3, HIGH);
 
   // Reading the output frequency
   greenFrequency = pulseIn(sensorOut, LOW);
   // Remaping the value of the GREEN (G) frequency from 0 to 255
   // You must replace with your own values. Here's an example:
   // greenColor = map(greenFrequency, 100, 199, 255, 0);
-  greenColor = map(greenFrequency, 38, 101, 255, 0);
+  greenColor = map(greenFrequency, 61, 109, 255, 0);
 
   // Printing the GREEN (G) value
-  Serial.print(" G= ");
+  Serial.println(" G= ");
   Serial.print(greenColor);
   delay(100);
 
