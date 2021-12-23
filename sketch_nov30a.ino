@@ -1,28 +1,28 @@
-#define s0 4        //Module pins wiring
-#define s1 5
-#define s2 6
-#define s3 7
-#define out 8
+#include <Wire.h> // i2C Conection Library
+#include <LiquidCrystal_I2C.h> //i2C LCD Library 
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 #define SENSOR 9
 #define pwm1 44
 #define pwm2 46
-#include <LiquidCrystal_I2C.h>
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+#define S0 4
+#define S1 5
+#define S2 6
+#define S3 7
+#define sensorOut 8 
+int frequencyr = 0; 
+int frequencyg = 0; 
+int frequencyb = 0;
+int jumlah;
 
 const int relay1 = 2; //pin2
 const int relay2 = 3; //pin3
-
-int Red = 0, Blue = 0, Green = 0; //RGB values
-
-unsigned long interval = 2000; // the time we need to wait
-unsigned long previousMillis = 0; // millis() returns an unsigned long.
-
 int relayON = LOW; //relay nyala
 int relayOFF = HIGH; //relay mati
 
-void setup() {
-
+void setup() { 
   Serial.begin(9600);
   lcd.begin();
   lcd.backlight();
@@ -37,25 +37,33 @@ void setup() {
   Serial.println(" Deteksi Sensor IR " );
   delay(1000);
 
-  pinMode(pwm1, OUTPUT);
+    pinMode(pwm1, OUTPUT);
   pinMode(pwm2, OUTPUT);
-
-  pinMode(s0, OUTPUT);   //pin modes
-  pinMode(s1, OUTPUT);
-  pinMode(s2, OUTPUT);
-  pinMode(s3, OUTPUT);
-  pinMode(out, INPUT);
-
-  digitalWrite(s0, HIGH); //Putting S0/S1 on HIGH/HIGH levels means the output frequency scalling is at 100% (recommended)
-  digitalWrite(s1, HIGH); //LOW/LOW is off HIGH/LOW is 20% and LOW/HIGH is  2%
-
+  
+  pinMode(S0, OUTPUT); 
+  pinMode(S1, OUTPUT); 
+  pinMode(S2, OUTPUT); 
+  pinMode(S3, OUTPUT); 
+  pinMode(sensorOut, INPUT); 
+  digitalWrite(S0,HIGH); 
+  digitalWrite(S1,LOW); 
+ 
 }
 
 void loop() {
-
-  warna();
-
   int L = digitalRead(SENSOR);
+
+  digitalWrite(S2,LOW);
+  digitalWrite(S3,LOW);
+frequencyr = pulseIn(sensorOut, LOW);
+delay(100); 
+digitalWrite(S2,HIGH); 
+digitalWrite(S3,HIGH);
+frequencyg = pulseIn(sensorOut, LOW);
+delay(100); 
+digitalWrite(S2,LOW); 
+digitalWrite(S3,HIGH);
+frequencyb = pulseIn(sensorOut, LOW); 
 
   if (L == 0) {
     Serial.println("  Tedeteksi");
@@ -64,50 +72,36 @@ void loop() {
     lcd.print("Terdeteksi");
     analogWrite(pwm1, 0);
     analogWrite(pwm2, 0);
-
-    if (Red < Blue && Red <= Green && Red < 23) {
-      Serial.println(" - RED detected!");
-      digitalWrite(relay1, relayON);
-    }
-
-    else if (Red <= 15 && Green <= 15 && Blue <= 15)  {
-      Serial.println(" - WHITE detected!");
-      digitalWrite(relay1, relayOFF);
-      delay(3000);
-      analogWrite(pwm1, 0);
-      analogWrite(pwm2, 30);
-    }
-
-    else if (Blue < Green && Blue < Red && Blue < 20)
-      Serial.println("Blue");
-
-    else if (Green < Red && Green - Blue <= 8)
-      Serial.println("Green");
+    
+if((frequencyr > 30)&&(frequencyr < 38)&&(frequencyg > 49)&&(frequencyg < 61)&&(frequencyb > 42)&&(frequencyb < 51))
+{
+lcd.setCursor(0, 1);
+lcd.println("NODA");
+ digitalWrite(relay1, relayON);
+      delay(1000);
+       digitalWrite(relay1, relayOFF);
+      delay(1000);
+}
+else if((frequencyr > 22)&&(frequencyr < 24)&&(frequencyg > 36)&&(frequencyg
+< 49)&&(frequencyb > 36)&&(frequencyb < 45))
+{
+lcd.setCursor(0, 1);
+lcd.println("NODA");
+ digitalWrite(relay1, relayON);
+      delay(1000);
+       digitalWrite(relay1, relayOFF);
+      delay(1000);
+}
 
   }
-
-  else  {
+   else  {
     Serial.println("  Tidak terdeteksi");
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Tidak Terdeteksi");
-    analogWrite(pwm1, 0);
-    analogWrite(pwm2, 30);
+    analogWrite(pwm1, 12);
+    analogWrite(pwm2, 0);
     delay(1000);
   }
 
-}
-
-
-void warna() {
-  digitalWrite(s2, LOW);                                           //S2/S3 levels define which set of photodiodes we are using LOW/LOW is for RED LOW/HIGH is for Blue and HIGH/HIGH is for green
-  digitalWrite(s3, LOW);
-  Red = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);       //here we wait until "out" go LOW, we start measuring the duration and stops when "out" is HIGH again, if you have trouble with this expression check the bottom of the code
-  delay(100);
-  digitalWrite(s3, HIGH);                                         //Here we select the other color (set of photodiodes) and measure the other colors value using the same techinque
-  Blue = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
-  delay(100);
-  digitalWrite(s2, HIGH);
-  Green = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
-  delay(100);
 }
